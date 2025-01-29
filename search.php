@@ -38,13 +38,12 @@ $PAGE->set_context(context_system::instance());
 $defaultcategory = 0;
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-    question_edit_setup('categories', '/question/bank/managecategories/category.php');
+    question_edit_setup('categories', '/question/bank/search/search.php');
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
 $category = $DB->get_record('question_categories', ["id" => $catid, 'contextid' => $catcontext], '*', MUST_EXIST);
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
-
-$searchform = new question_search_form($thispageurl,
+$form = new question_search_form($thispageurl,
      ['contexts' => $contexts->having_one_edit_tab_cap('export'), 'defaultcategory' => $pagevars['cat']]);
 
 
@@ -52,9 +51,25 @@ $searchform = new question_search_form($thispageurl,
 $PAGE->set_context(context_system::instance());
 
 $PAGE->set_heading($SITE->fullname);
+
+if ($fromform = $form->get_data()) {
+    if (isset($fromform->submitbutton)) {
+        xdebug_break();
+        $msg = 'No matches found';
+        \core\notification::add($msg, \core\notification::SUCCESS);
+        [$categoryid,$context] = explode(',', $fromform->category);
+         $sql = "SELECT q.id,q.name,q.questiontext FROM {question} q
+                JOIN {question_versions} qv ON qv.questionid = q.id
+                JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                WHERE qc.id = :categoryid";
+                $questions = $DB->get_records_sql($sql, ['categoryid' => $categoryid]);
+       }
+}
 echo $OUTPUT->header();
 xdebug_break();
 
-$searchform->display();
+$form->display();
+xdebug_break();
 
 echo $OUTPUT->footer();

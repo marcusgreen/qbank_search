@@ -31,7 +31,6 @@ use moodleform;
 class question_search_form extends moodleform{
     public function definition() {
         $mform = $this->_form;
-        xdebug_break();
 
         $defaultcategory = $this->_customdata['defaultcategory'];
         $contexts = $this->_customdata['contexts'];
@@ -42,10 +41,9 @@ class question_search_form extends moodleform{
          $mform->setDefault('category', $defaultcategory);
          $mform->addHelpButton('category', 'exportcategory', 'question');
 
-
          $mform->addElement('text','search','search');
          $mform->setType('search',PARAM_TEXT);
-
+         $this->add_action_buttons(true, get_string('search'));
 
     }
 
