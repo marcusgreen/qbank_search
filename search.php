@@ -22,18 +22,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-//require('../../../config.php');
 require_once(__DIR__ . '/../../../config.php');
 
 require_once($CFG->dirroot . '/question/editlib.php');
 require_login();
+
 use qbank_search\form\question_search_form;
+use qbank_search\helper;
 
 require_login();
 
-$url = new moodle_url('/question/bank/search/search.php', []);
+$url = new \moodle_url('/question/bank/search/search.php', []);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());
+$returnurl = optional_param('returnurl', 0, PARAM_LOCALURL);
 
 $defaultcategory = 0;
 
@@ -43,10 +45,10 @@ list($catid, $catcontext) = explode(',', $pagevars['cat']);
 $category = $DB->get_record('question_categories', ["id" => $catid, 'contextid' => $catcontext], '*', MUST_EXIST);
 $courseid = optional_param('courseid', 0, PARAM_INT);
 
-$form = new question_search_form($thispageurl,
-     ['contexts' => $contexts->having_one_edit_tab_cap('export'), 'defaultcategory' => $pagevars['cat']]);
-
-
+$form = new question_search_form(
+    $thispageurl,
+    ['contexts' => $contexts, 'defaultcategory' => $pagevars['cat'], 'courseid' => $courseid]
+);
 
 $PAGE->set_context(context_system::instance());
 
@@ -54,22 +56,21 @@ $PAGE->set_heading($SITE->fullname);
 
 if ($fromform = $form->get_data()) {
     if (isset($fromform->submitbutton)) {
-        xdebug_break();
-        $msg = 'No matches found';
-        \core\notification::add($msg, \core\notification::SUCCESS);
-        [$categoryid,$context] = explode(',', $fromform->category);
-         $sql = "SELECT q.id,q.name,q.questiontext FROM {question} q
-                JOIN {question_versions} qv ON qv.questionid = q.id
-                JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-                WHERE qc.id = :categoryid";
-                $questions = $DB->get_records_sql($sql, ['categoryid' => $categoryid]);
-       }
+        $matches =  \qbank_search\helper::search_questions($fromform);
+        if (!empty($matches)) {
+            $request = data_submitted();
+            $searchparams['searchterm'] = $fromform->searchterm;
+            $searchparams['courseid'] = $courseid;
+            $searchparams['matchids'] = implode(',', array_keys($matches));
+            $form->set_data($searchparams);
+        } else {
+            $msg = 'No matches found';
+            \core\notification::add($msg, \core\notification::SUCCESS);
+        }
+    }
 }
 echo $OUTPUT->header();
-xdebug_break();
 
 $form->display();
-xdebug_break();
 
 echo $OUTPUT->footer();
