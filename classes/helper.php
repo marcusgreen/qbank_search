@@ -20,15 +20,28 @@ namespace qbank_search;
  * Class helper
  *
  * @package    qbank_search
- * @copyright  2025 2024 Marcus Green
+ * @copyright  2025 Marcus Green
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
     public static function search_questions($fromform) {
         global $DB;
-        [$categoryid,$context] = explode(',', $fromform->category);
+        $qids = [];
 
-        $questionids = \question_bank::get_finder()->get_questions_from_categories([$categoryid],"");
+        [$categoryid, $contextid] = explode(',', $fromform->category);
+        if($fromform->includesubcategories == 1){
+            $questioncontext = \context::instance_by_id($contextid, MUST_EXIST);
+            $childcontexts = $questioncontext->get_child_contexts();
+            $children = [];
+            foreach($childcontexts as $context) {
+                $children[] = \question_bank::get_finder()->get_questions_from_categories([$context->id], "");
+            }
+            foreach($children as $child) {
+                $qids = array_merge($qids, $child);
+            }
+        }
+        $questionids = \question_bank::get_finder()->get_questions_from_categories([$categoryid], "");
+        $questionids = array_merge($questionids, $qids);
         list($usql, $params) = $DB->get_in_or_equal($questionids);
 
         $sql = "SELECT q.id, q.questiontext, c.contextid
@@ -38,7 +51,7 @@ class helper {
                   JOIN {question_categories} c ON c.id = qbe.questioncategoryid
                  WHERE q.id
                  {$usql} and q.questiontext like ?";
-        $params[] =  "%$fromform->searchterm%";
+        $params[] = "%$fromform->searchterm%";
         $matches = $DB->get_records_sql($sql, $params);
         return $matches;
     }

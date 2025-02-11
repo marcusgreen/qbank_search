@@ -56,7 +56,7 @@ $PAGE->set_heading($SITE->fullname);
 
 if ($fromform = $form->get_data()) {
     if (isset($fromform->submitbutton)) {
-        $matches =  \qbank_search\helper::search_questions($fromform);
+        $matches = \qbank_search\helper::search_questions($fromform);
         if (!empty($matches)) {
             $request = data_submitted();
             $searchparams['searchterm'] = $fromform->searchterm;

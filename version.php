@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->component    = 'qbank_search';
 $plugin->release      = '1.0';
 $plugin->version      = 2025012300;
-$plugin->requires     = 2024100701.06;
-$plugin->supported    = [405, 405];
+$plugin->requires     = 2024100700;
+$plugin->supported    = [404, 405];
 $plugin->maturity     = MATURITY_STABLE;

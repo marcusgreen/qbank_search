@@ -52,12 +52,16 @@ class question_search_form extends moodleform {
         $mform->setDefault('category', $defaultcategory);
         $mform->addHelpButton('category', 'exportcategory', 'question');
 
+        $mform->addElement('checkbox', 'includesubcategories', get_string('includesubcategories', 'question'));
+        $mform->setType('includesubcategories', PARAM_BOOL);
+        $mform->setDefault('includesubcategories', 1);
+
         $mform->addElement('text', 'searchterm', 'search');
-        $mform->setType('search', PARAM_TEXT);
+        $mform->setType('searchterm', PARAM_TEXT);
         $this->add_action_buttons(true, get_string('search'));
         $mform->addElement('static', 'matchedquestiontext');
     }
-    public function set_data($data){
+    public function set_data($data) {
         $mform = $this->_form;
         $data = (object) $data;
         $mform->getElement('courseid')->setValue($data->courseid);
@@ -87,7 +91,7 @@ class question_search_form extends moodleform {
         }
         $data = ['questions' => array_values($matchingquestions)];
 
-        $templateoutput =  $OUTPUT->render_from_template('qbank_search/questions', $data);
+        $templateoutput = $OUTPUT->render_from_template('qbank_search/questions', $data);
         return $templateoutput;
     }
 }
