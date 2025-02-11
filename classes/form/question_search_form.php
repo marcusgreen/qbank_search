@@ -52,6 +52,10 @@ class question_search_form extends moodleform {
         $mform->setDefault('category', $defaultcategory);
         $mform->addHelpButton('category', 'exportcategory', 'question');
 
+        $mform->addElement('checkbox', 'includesubcategories', get_string('includesubcategories', 'question'));
+        $mform->setType('includesubcategories', PARAM_BOOL);
+        $mform->setDefault('includesubcategories', 1);
+
         $mform->addElement('text', 'searchterm', 'search');
         $mform->setType('search', PARAM_TEXT);
         $this->add_action_buttons(true, get_string('search'));
