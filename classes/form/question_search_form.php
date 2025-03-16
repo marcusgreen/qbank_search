@@ -36,7 +36,7 @@ class question_search_form extends moodleform {
         $defaultcategory = $this->_customdata['defaultcategory'];
         $courseid = $this->_customdata['courseid'];
         $contexts = $this->_customdata['contexts'];
-        $mform->addElement('text', 'courseid');
+        $mform->addElement('hidden', 'courseid');
         $mform->setDefault('courseid', $courseid);
         $mform->setType('courseid', PARAM_INT);
 
@@ -50,13 +50,15 @@ class question_search_form extends moodleform {
             ]
         );
         $mform->setDefault('category', $defaultcategory);
-        $mform->addHelpButton('category', 'exportcategory', 'question');
+        $mform->addHelpButton('category', 'searchcategory', 'qbank_search');
 
         $mform->addElement('checkbox', 'includesubcategories', get_string('includesubcategories', 'question'));
         $mform->setType('includesubcategories', PARAM_BOOL);
         $mform->setDefault('includesubcategories', 1);
 
-        $mform->addElement('text', 'searchterm', 'search');
+        $mform->addElement('text', 'searchterm', get_string('searchterm', 'qbank_search'), 'size="30"');
+        $mform->addHelpButton('searchterm', 'searchterm', 'qbank_search');
+
         $mform->setType('searchterm', PARAM_TEXT);
         $this->add_action_buttons(true, get_string('search'));
         $mform->addElement('static', 'matchedquestiontext');
@@ -75,9 +77,12 @@ class question_search_form extends moodleform {
         if ($matchids == '') {
             return '';
         }
-        $ids = explode("'", $matchids);
-        $sql = 'SELECT id, name, questiontext FROM {question} WHERE id IN (' . implode(',', $ids) . ')';
-        $matchingquestions = $DB->get_records_sql($sql);
+        $ids = explode(",", $matchids);
+        [$insql, $inparams] = $DB->get_in_or_equal($ids);
+        // $sql = 'SELECT id, name, questiontext FROM {question} WHERE id IN (' . implode(',', $ids) . ')';
+        // $matchingquestions = $DB->get_records_sql($sql);
+        $sql = 'SELECT id, name, questiontext FROM {question} WHERE id '. $insql;
+        $matchingquestions = $DB->get_records_sql($sql,$inparams);
 
         foreach ($matchingquestions as $question) {
             $pattern = '/(' . preg_quote($searchterm, '/') . ')/i';
