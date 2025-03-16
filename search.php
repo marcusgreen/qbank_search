@@ -69,7 +69,15 @@ if ($fromform = $form->get_data()) {
         }
     }
 }
+// Header.
+$PAGE->set_url($thispageurl);
+$PAGE->activityheader->disable();
 echo $OUTPUT->header();
+// Print horizontal nav if needed.
+$renderer = $PAGE->get_renderer('core_question', 'bank');
+
+$qbankaction = new \core_question\output\qbank_action_menu($thispageurl);
+echo $renderer->render($qbankaction);
 
 $form->display();
 

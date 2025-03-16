@@ -40,6 +40,9 @@ class question_search_form extends moodleform {
         $mform->setDefault('courseid', $courseid);
         $mform->setType('courseid', PARAM_INT);
 
+        $mform->addElement('header', 'header', get_string('search_header', 'qbank_search'));
+
+
         $mform->addElement(
             'questioncategory',
             'category',
@@ -60,7 +63,7 @@ class question_search_form extends moodleform {
         $mform->addHelpButton('searchterm', 'searchterm', 'qbank_search');
 
         $mform->setType('searchterm', PARAM_TEXT);
-        $this->add_action_buttons(true, get_string('search'));
+        $this->add_action_buttons(false, get_string('search'));
         $mform->addElement('static', 'matchedquestiontext');
     }
     public function set_data($data) {

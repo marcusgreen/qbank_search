@@ -27,5 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Search';
 $string['searchcategory'] = 'Top cagtegory to search from';
 $string['searchcategory_help'] = 'Top cagtegory to search from';
+$string['search_header'] = 'Search Questiontext';
 $string['searchterm'] = 'Search term';
 $string['searchterm_help'] = 'Performs a wildcard search through the question text, If you enter "myterm" it sill search for "%myterm%"';
